@@ -1,0 +1,22 @@
+# 构建中间产物
+decoded/
+work/
+payload/
+build/
+*.apk.tmp
+
+# 签名材料（绝不入库）
+*.keystore
+*.jks
+*.p12
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
