@@ -1,4 +1,43 @@
-# 2.3.1 缺陷修复说明
+# 缺陷修复记录
+
+本文件记录自 2.3.0 发布以来针对用户反馈的修复，按版本倒序排列。
+
+---
+
+## 2.3.2（2026-11-17）— 分类归属修正
+
+### 问题
+
+AMD 产品线列表中出现了一个与 `Ryzen` 并列的 `Ryzen 9` 条目；移动端另有独立的 `Ryzen AI`。
+
+### 原因
+
+原库的 AMD 产品线只有 `Ryzen`，`Ryzen 3 / 5 / 7` 都是它下面的**系列**。2.3.0 为了容纳 Ryzen 9，把它建成了新的产品线（id 39 / 40），`Ryzen AI` 同理（id 41），于是列表里多出三个并列项。
+
+### 修复
+
+删除了这三个产品线，所有系列并回 `Ryzen`（桌面 id 10 / 移动 id 35），并重排 `order_family`，使每代按 3 → 5 → 7 → 9 排列，Threadripper 紧随同代之后。
+
+```
+修复前（AMD / 桌面）           修复后
+K5 … FX-Series, Ryzen,        K5 … FX-Series, Ryzen
+               Ryzen 9                        └─ Ryzen 3/5/7/9 1000–9000
+                                                 Threadripper 1000–9000
+```
+
+| 项 | 2.3.1 | 2.3.2 |
+|---|---|---|
+| AMD 产品线 | 41（含多建的 3 个） | **38**（与原库一致） |
+| `Ryzen` / 桌面 系列数 | 25 | **29** |
+| `Ryzen` / 移动 系列数 | 22 | **26** |
+| versionCode / versionName | 202612 / 2.3.1 | **202613 / 2.3.2** |
+| 内置数据库版本 | 0xC0B0B12 | **0xC0B0B13** |
+
+说明：Intel 的 `Core Ultra 5/7/9` 与 `Intel Processor` 仍为独立产品线，这与厂商命名一致——它们是取代 Core i 的新品牌，而非 Core i 下的分级；而 Ryzen 9 只是 Ryzen 品牌的数字分级，因此归属不同。
+
+---
+
+## 2.3.1（2026-11-17）— 稳定性修复
 
 针对 2.3.0 反馈的 5 类问题逐项定位与修复。
 
@@ -12,7 +51,7 @@
 
 ---
 
-## 1. 分类重复与排序冲突
+### 1. 分类重复与排序冲突
 
 **`Pentium Silver` 重复**
 
@@ -43,7 +82,7 @@ amd  产品线排序冲突   : 仅剩 (mb,4) Athlon/Turion ← 原库自带，�
 
 ---
 
-## 2 & 5. 广告与卡顿
+### 2 & 5. 广告与卡顿
 
 `AdsHelper` 的 `a(Z)V` 是所有广告入口（主页、对比页、双型号对比页）的唯一入口，内部会：
 
@@ -66,7 +105,7 @@ amd  产品线排序冲突   : 仅剩 (mb,4) Athlon/Turion ← 原库自带，�
 
 ---
 
-## 3. 反复提示版本更新
+### 3. 反复提示版本更新
 
 `CheckUpdateMainDbAsync`（`a/a`）在两处被启动：
 
@@ -94,7 +133,7 @@ if-eqz p1, :done      # 无更新时不回调，避免空指针
 
 ---
 
-## 4. 排行榜型号错误
+### 4. 排行榜型号错误
 
 `TopCpuFragment` 读取 `db_user.cpuTop` 表（字段 `idCpu` / `idBrand` / `nameCpu`）。该表由 `CheckUpdateTopListAsync` 从 `ijrsoftware.com/json/top_cpus.json` 下载后写入。
 
@@ -122,7 +161,7 @@ invoke-static {p2, v6}, Lcom/ijsoft/cpul/d/g;->rebuildTopList(Landroid/content/C
 
 ---
 
-## 版本与升级
+### 版本与升级
 
 | 项 | 2.3.0 | 2.3.1 |
 |---|---|---|
@@ -135,7 +174,7 @@ invoke-static {p2, v6}, Lcom/ijsoft/cpul/d/g;->rebuildTopList(Landroid/content/C
 
 ---
 
-## 验证
+### 验证
 
 | 检查项 | 结果 |
 |---|---|
@@ -150,7 +189,7 @@ invoke-static {p2, v6}, Lcom/ijsoft/cpul/d/g;->rebuildTopList(Landroid/content/C
 
 ---
 
-## 仍未解决
+### 仍未解决
 
 **未在真机验证**。以上结论基于静态分析 + 数据模拟，无法覆盖设备侧的运行时行为。若安装 2.3.1 后仍卡顿，需要 `logcat` 抓取 ANR 堆栈才能定位：
 
